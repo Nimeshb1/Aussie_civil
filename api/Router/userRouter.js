@@ -1,16 +1,93 @@
 import express from "express";
-import { postUsers } from "../moodle/moodle.js";
-import { haspassword } from "../bcryot/bcrypt.js";
+import { getdata, postUsers, verifyPost } from "../moodle/moodle.js";
+import { comparePassword, haspassword } from "../bcryot/bcrypt.js";
 import { v4 as uuidv4 } from "uuid";
 import { adminSignupEmail } from "../verification/verification.js";
 
 const router = express.Router();
 
-router.get("/", (req, res, next) => {
-  res.json({
-    status: "success",
-    message: "Sucessfully fatch",
-  });
+router.post("/login", async (req, res, next) => {
+  try {
+    const email = req.body.email[0].toUpperCase() + req.body.email.slice(1);
+    req.body.email = email;
+
+    const data = await getdata(req.body);
+
+    const compPassword = comparePassword(req.body.password, data.password);
+    data.password = undefined;
+
+    if (!data?.validation || data?.verificationCode) {
+      res.json({
+        status: "error",
+        message: "Account is not verified",
+      });
+      return;
+    }
+    if (!data?._id) {
+      res.json({
+        status: "error",
+        message: "Wrong Email",
+      });
+      return;
+    }
+    if (!compPassword) {
+      res.json({
+        status: "error",
+        message: "Wrong Password",
+      });
+      return;
+    }
+    if (data?.validation && !data?.verificationCode && compPassword) {
+      res.json({
+        status: "success",
+        message: "SucessFully Longin",
+        data,
+      });
+      return;
+    }
+  } catch (error) {
+    const message = error.message;
+    if (
+      message.includes("Cannot read properties of null (reading 'password')")
+    ) {
+      res.json({
+        status: "error",
+        message: "Wrong Email and password",
+      });
+    }
+    console.log(error.message);
+  }
+});
+router.post("/reverify", async (req, res, next) => {
+  try {
+    const email = req.body.email[0].toUpperCase() + req.body.email.slice(1);
+    req.body.email = email;
+    const data = await getdata(req.body);
+    if (data?.validation && !data?.verificationCode) {
+      res.json({
+        status: "error",
+        message: "Email is already verified, Please login",
+      });
+      return;
+    }
+    if (!data?._id) {
+      res.json({
+        status: "error",
+        message: "Data not found, please Register",
+      });
+      return;
+    }
+    if (data?._id && !data?.validation && data?.verificationCode) {
+      const uniqueUrl = `http://localhost:3000/verify?c=${data.verificationCode}&email=${data.email}`;
+      adminSignupEmail(data, uniqueUrl);
+      res.json({
+        status: "success",
+        message: "Verification send to you email, Please verify and login",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
 });
 router.post("/", async (req, res, next) => {
   const lowercase =
@@ -50,7 +127,7 @@ router.post("/", async (req, res, next) => {
     // hass password
     const haspass = haspassword(req.body.password);
     const email = req.body.email[0].toUpperCase() + req.body.email.slice(1);
-    console.log(email);
+
     if (haspass) {
       req.body.email;
       req.body.password = haspass;
@@ -59,6 +136,7 @@ router.post("/", async (req, res, next) => {
       req.body.verificationCode = uuidv4();
     }
     const data = await postUsers(req.body);
+
     if (data?._id) {
       //process for the email
       const uniqueUrl = `http://localhost:3000/verify?c=${data.verificationCode}&email=${data.email}`;
@@ -119,11 +197,25 @@ router.post("/", async (req, res, next) => {
     next(error);
   }
 });
-router.patch("/", (req, res, next) => {
-  res.json({
-    status: "success",
-    message: "Sucessfully updated",
-  });
+router.post("/verify", async (req, res, next) => {
+  try {
+    const obj = {
+      verificationCode: "",
+      validation: true,
+    };
+    const data = await verifyPost(req.body, obj);
+    if (data?._id) {
+      res.json({
+        status: "success",
+        message: "Email verified",
+      });
+      return;
+    }
+    res.json({
+      status: "error",
+      message: "Invalid link",
+    });
+  } catch (error) {}
 });
 router.delete("/", (req, res, next) => {
   res.json({

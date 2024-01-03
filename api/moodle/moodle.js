@@ -4,3 +4,9 @@ import userSchama from "../schama/userSchama.js";
 export const postUsers = (obj) => {
   return userSchama(obj).save();
 };
+export const verifyPost = (filter, obj) => {
+  return userSchama.findOneAndUpdate(filter, obj, { new: true });
+};
+export const getdata = ({ email }) => {
+  return userSchama.findOne({ email });
+};

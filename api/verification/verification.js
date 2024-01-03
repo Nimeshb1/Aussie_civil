@@ -31,11 +31,11 @@ export const adminSignupEmail = async ({ email, fname, lname }, uniqueUrl) => {
       text: `Hi ${fname} ${lname}, * Please donot reply to this email * Your have sucessfully created an Account. We have send you a verification Link. Please veryfy your account to continuted. ${uniqueUrl}`,
       html: `<b>Hi  ${fname} ${lname},</b> 
       <p><p>
-      <b > * Please donot reply to this email *<b>
-      <p>Your have sucessfully created an Account. We have send you a verification Link, Please very your account to continuted. </P? 
+    <b style='color:red' > * Please donot reply to this email *</b>
+      <p>Your have sucessfully created an Account. We have send you a verification Link, Please verify your account to continuted. </P? 
       <p></P>
       <p></P>
-      ${uniqueUrl}
+      <a href=${uniqueUrl} style:"color:blue">Verify Now</a>
       <p></P>
       <p></P>
       <p></P>
