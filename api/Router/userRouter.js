@@ -217,6 +217,7 @@ router.post("/verify", async (req, res, next) => {
     });
   } catch (error) {}
 });
+
 router.delete("/", (req, res, next) => {
   res.json({
     status: "success",

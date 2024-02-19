@@ -4,6 +4,8 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import { mongoConnect } from "./mdconfig/mdbconfig.js";
 import router from "./Router/userRouter.js";
+import dashRouter from "./Router/dashRouter.js";
+import { authWare } from "./middleware/authWare.js";
 dotenv.config();
 
 // ceating app and PORT
@@ -28,9 +30,10 @@ app.use((error, req, res, next) => {
 });
 
 // creating router
-app.use("/aussie/", router);
+app.use("/aussie", router);
+app.use("/aussie/dash", authWare, dashRouter);
 
-app.use("*", (error, req, res) => {
+app.use((error, req, res, next) => {
   if (error) {
     res.json({
       status: "error",
@@ -38,7 +41,6 @@ app.use("*", (error, req, res) => {
     });
   }
 });
-
 // creating listner
 app.listen(PORT, (error) => {
   error

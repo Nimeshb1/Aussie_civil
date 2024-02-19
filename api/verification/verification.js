@@ -50,3 +50,37 @@ export const adminSignupEmail = async ({ email, fname, lname }, uniqueUrl) => {
     console.log(error);
   }
 };
+export const InvoiceEmail = async ({ invoiceName }, newdata) => {
+  try {
+    // send mail with defined transport object
+    let secinfo = {
+      from: `Aussie Civil <${process.env.Email}`,
+      to: `${process.env.reciverEmail}`, // list of receivers
+      subject: `Verification mail `, // Subject line
+      text: `Hi , * Please donot reply to this email * Invoice attached in this email`,
+      html: `<b>Hi  ,</b> 
+      <p><p>
+    <b style='color:red' > * Please donot reply to this email *</b>
+      <p>Invoice attached in this email. </P? 
+      <p></P>
+      <p></P>
+      <p></P>
+      <p></P>
+      <p></P>
+      Thank you
+      <p></P>
+      Aussie Civil
+      `, // html body
+      attachments: [
+        {
+          filename: `${invoiceName}.pdf`,
+          path: newdata.file,
+        },
+      ],
+    };
+
+    emailProcessing(secinfo);
+  } catch (error) {
+    console.log(error);
+  }
+};
