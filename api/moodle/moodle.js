@@ -54,6 +54,10 @@ export const getDrivers = (userId) => {
 export const postInvoice = (obj) => {
   return invoiceSchema(obj).save();
 };
-export const getInvoice = (userId) => {
-  return invoiceSchema.findById({ _id: userId });
+export const getInvoice = (_id) => {
+  console.log(_id);
+  return invoiceSchema.findById({ _id: _id });
+};
+export const getJobID = (_id) => {
+  return jobSchema.findById({ _id: _id });
 };

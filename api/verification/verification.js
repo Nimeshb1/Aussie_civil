@@ -14,6 +14,7 @@ const emailProcessing = async (emaiinfo) => {
     });
 
     const info = await transporter.sendMail(emaiinfo);
+
     console.log("Message sent: %s", info.messageId);
   } catch (error) {
     console.log(error);

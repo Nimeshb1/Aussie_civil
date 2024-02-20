@@ -12,6 +12,7 @@ import {
   findCancle,
   getDrivers,
   getInvoice,
+  getJobID,
   getJobs,
   getvechileImage,
   jobsFindandUpdate,
@@ -48,6 +49,27 @@ dashRouter.get("/", async (req, res, next) => {
   try {
     const userId = req.headers.authorization;
     const data = await getJobs(userId);
+
+    if (data) {
+      res.json({
+        status: "success",
+        message: "Fatch Success!!",
+        data,
+      });
+      return;
+    }
+    res.json({
+      status: "error",
+      message: "Something went wrong, Please try again!!",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+dashRouter.post("/getJobForInvoice", async (req, res, next) => {
+  try {
+    const jonId = req.body.obj;
+    const data = await getJobID(jonId);
 
     if (data) {
       res.json({
@@ -148,7 +170,6 @@ dashRouter.post("/jobs", async (req, res, next) => {
   }
 });
 dashRouter.post("/driver", upload.single("image"), async (req, res, next) => {
-  console.log(ascessKey);
   try {
     const prams = {
       Bucket: bucketName,
@@ -239,12 +260,12 @@ dashRouter.post("/invoice", upload.single("file"), async (req, res, next) => {
         const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
         newdata.file = url;
 
-        console.log(newdata);
         if (newdata) {
-          InvoiceEmail(req.body, newdata);
+          const { status, message } = InvoiceEmail(req.body, newdata);
+          console.log(status);
           res.json({
             status: "success",
-            message: "Invoice send✅",
+            message: "Docket Upload Sucessfully",
           });
         }
         return;
